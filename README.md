@@ -1,5 +1,5 @@
 # PGCN
-PyTorch implementation of Progressive Graph Convolutional Networks for semi-supervised node classification method.
+PyTorch implementation of Progressive Graph Convolutional Networks for Semi-Supervised Node Classification method [1].
 
 
 
@@ -9,6 +9,12 @@ PyTorch implementation of Progressive Graph Convolutional Networks for semi-supe
 
 
 
+
+## References
+
+[1] [Heidari & Iosifidis, Progressive Graph Convolutional Networks for Semi-Supervised Node Classification, 2020]
+
+[2] [Kipf & Welling, Semi-Supervised Classification with Graph Convolutional Networks, 2016](https://arxiv.org/abs/1609.02907)
 
 
 
