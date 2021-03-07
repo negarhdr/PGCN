@@ -39,7 +39,7 @@ You can specify different hyper-parameters of the model when running the code.
 [2] [Kipf & Welling, Semi-Supervised Classification with Graph Convolutional Networks, 2016](https://arxiv.org/abs/1609.02907)
 
 
-##Acknowledgement
+## Acknowledgement
 
 This repo is modified based on [PyGCN](https://github.com/tkipf/pygcn).
 
