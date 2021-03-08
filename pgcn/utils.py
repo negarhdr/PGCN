@@ -22,8 +22,8 @@ def load_data(path="../data/", dataset="cora"):
     N = labels.shape[0]
     I_N = np.eye(N, N)
     Lplcn = I_N - np.array(adj.todense())
-    labels_onehot = labels
     ######################################
+    labels_onehot = labels
     features = torch.FloatTensor(np.array(features.todense()))
     labels = torch.LongTensor(np.where(labels)[1])
     adj = sparse_mx_to_torch_sparse_tensor(adj)
