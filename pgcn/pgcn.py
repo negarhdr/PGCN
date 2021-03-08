@@ -167,8 +167,8 @@ def PGCN(args, adj, features, labels, idx_train, idx_val, idx_test, train_mask, 
             ############# initialize the output layer (least_square) ##################
             H = model(features, adj, ls=True)
             H = H.detach().cpu().numpy()
-            N_ = labels.shape[0]
-            D_ = args.topology[-1] * args.blocksize
+            N_ = H.shape[0]
+            D_ = H.shape[1]
             I_N = np.eye(N_, N_)
             coef = np.divide(1, (0.1 * (N_ ** 2)))
             Lplcn = I_N + (coef * Lplcn)
