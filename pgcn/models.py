@@ -13,11 +13,16 @@ class GCN(nn.Module):
         self.outlayer = GraphConvolution(infeat, topology, bsize, self.num_layers, n_class)
         self.dropout = dropout
 
-    def forward(self, x, adj):
+    def forward(self, x, adj, ls=False):
         for i in range(self.num_layers):
             x = self.layers['gc' + str(i)](x, adj)
             x = F.relu(x)
             if i == 0:
                 x = F.dropout(x, self.dropout, training=self.training)
-        x = self.outlayer(x, adj)
-        return F.log_softmax(x, dim=1)
+
+        if ls:
+            pred = x
+        else:
+            x = self.outlayer(x, adj)
+            pred = F.log_softmax(x, dim=1)
+        return pred

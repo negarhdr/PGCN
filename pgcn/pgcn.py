@@ -50,7 +50,8 @@ parser.add_argument('--datapath', type=str, default='../data/',
 
 args = parser.parse_args()
 ######## load data #########
-adj, features, labels, idx_train, idx_val, idx_test = load_data(path="../data/", dataset=args.dataset)
+adj, features, labels, idx_train, idx_val, idx_test, train_mask, Lplcn, labels_onehot = load_data(path="../data/",
+                                                                                                  dataset=args.dataset)
 
 
 ######## load model #########
@@ -63,7 +64,38 @@ def load_model(args):
     return model
 
 
-######## training #########
+########## model initialization with finetuned weights ####################
+
+def init_weights(model, args, layer_init, block_iter):
+    if block_iter == 0:
+        weights = torch.load('./saved_models/' + args.model_saved_name + '-' + str(len(args.topology) - 1) + '-' + str(
+            args.topology[-2]) + '.pt')
+    else:
+        weights = torch.load('./saved_models/' + args.model_saved_name + '-' + str(len(args.topology)) + '-' + str(
+            args.topology[-1] - 1) + '.pt')
+
+    weights = OrderedDict([[k, v.cuda()] for k, v in weights.items()])
+    old_keys = list(weights.keys())
+    for current_key in model.state_dict():
+        if ('bias') in current_key:
+            if current_key in old_keys:
+                W_ = model.state_dict()[current_key]
+                old_sh = weights[current_key].shape
+                W_[:old_sh[0]] = weights[current_key]
+                new_state_dict = OrderedDict({current_key: W_})
+                model.load_state_dict(new_state_dict, strict=False)
+        if 'weight' in current_key:
+            if current_key in old_keys:
+                W_ = model.state_dict()[current_key]
+                old_sh = weights[current_key].shape
+                W_[:, :old_sh[1]] = weights[current_key]
+                new_state_dict = OrderedDict({current_key: W_})
+                model.load_state_dict(new_state_dict, strict=False)
+        return model
+
+    ######## training #########
+
+
 def train(model, args, optimizer, epoch, adj, features, labels, idx_train, idx_val, idx_test, save_model=False):
     t = time.time()
     model.train()
@@ -107,39 +139,8 @@ def test(model, args, adj, features, labels, idx_train, idx_val, idx_test):
     return loss_test, acc_test
 
 
-########## model initialization with finetuned weights ####################
-
-def init_weights(model, args, layer_init, block_iter):
-    if block_iter == 0:
-        weights = torch.load('./saved_models/' + args.model_saved_name + '-' + str(len(args.topology) - 1) + '-' + str(
-            args.topology[-2]) + '.pt')
-    else:
-        weights = torch.load('./saved_models/' + args.model_saved_name + '-' + str(len(args.topology)) + '-' + str(
-            args.topology[-1] - 1) + '.pt')
-
-    weights = OrderedDict([[k, v.cuda()] for k, v in weights.items()])
-    old_keys = list(weights.keys())
-    for current_key in model.state_dict():
-        if ('bias') in current_key:
-            if current_key in old_keys:
-                W_ = model.state_dict()[current_key]
-                old_sh = weights[current_key].shape
-                W_[:old_sh[0]] = weights[current_key]
-                new_state_dict = OrderedDict({current_key: W_})
-                model.load_state_dict(new_state_dict, strict=False)
-        if 'weight' in current_key:
-            if current_key in old_keys:
-                W_ = model.state_dict()[current_key]
-                old_sh = weights[current_key].shape
-                W_[:, :old_sh[1]] = weights[current_key]
-                new_state_dict = OrderedDict({current_key: W_})
-                model.load_state_dict(new_state_dict, strict=False)
-        return model
-
-    ################# PGCN algorithm ###############
-
-
-def PGCN(args, adj, features, labels, idx_train, idx_val, idx_test):
+################# PGCN algorithm ###############
+def PGCN(args, adj, features, labels, idx_train, idx_val, idx_test, train_mask, Lplcn, labels_onehot):
     acc_layer_old = 1e-10
     acc_block_old = 1e-10
     acc_layer_new = 1e-10
@@ -162,7 +163,29 @@ def PGCN(args, adj, features, labels, idx_train, idx_val, idx_test):
             optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
             ########## initialize the weights #############
             if (layer_iter > 0 or block_iter > 0):
-                model = init_weights(model, args, layer_iter, block_iter)  ################ modify init_weights
+                model = init_weights(model, args, layer_iter, block_iter)  ################
+            ############# initialize the output layer (least_square) ##################
+            H = model(features, adj, ls=True)
+            H = H.detach().cpu().numpy()
+            N_ = labels.shape[0]
+            D_ = args.topology[-1] * args.blocksize
+            I_N = np.eye(N_, N_)
+            coef = np.divide(1, (0.1 * (N_ ** 2)))
+            Lplcn = I_N + (coef * Lplcn)
+            tmp = np.matmul(np.transpose(H), Lplcn)
+            tmp = np.matmul(tmp, H)
+            xTx = np.linalg.pinv(tmp + ((1 / 0.1) * np.eye(D_, D_)))
+            mask = np.array(train_mask, dtype=int)
+            H_train = np.matmul(np.diag(mask), H)
+            labels_train = np.matmul(np.diag(mask), labels_onehot)
+            xTy = np.matmul(np.transpose(H_train), labels_train)
+            O_ = np.matmul(xTx, xTy)
+            O_ = torch.from_numpy(O_)
+            for current_key in model.state_dict():
+                if ('outlayer.weight') in current_key:
+                    new_state_dict = OrderedDict({current_key: O_})
+                    model.load_state_dict(new_state_dict, strict=False)
+            #####################################################
             if args.cuda:
                 model.cuda()
                 features = features.cuda()
@@ -246,6 +269,6 @@ torch.manual_seed(args.seed)
 if args.cuda:
     torch.cuda.manual_seed(args.seed)
 
-PGCN(args, adj, features, labels, idx_train, idx_val, idx_test)
+PGCN(args, adj, features, labels, idx_train, idx_val, idx_test, train_mask, Lplcn, labels_onehot)
 
 
