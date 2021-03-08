@@ -19,7 +19,6 @@ class GCN(nn.Module):
             x = F.relu(x)
             if i == 0:
                 x = F.dropout(x, self.dropout, training=self.training)
-
         if ls:
             pred = x
         else:
