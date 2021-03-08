@@ -12,5 +12,5 @@ setup(name='PGCN',
                         'torch',
                         'scipy'
                         ],
-      package_data={'pygcn': ['README.md']},
+      package_data={'pgcn': ['README.md']},
       packages=find_packages())
