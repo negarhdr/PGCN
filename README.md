@@ -28,7 +28,7 @@ The preprocessed Citeseer, Cora and Pubmed datasets can be found in ./pgcn/data 
 
 ```python pgcn.py --dataset cora --blocksize 5 --epochs 200```
 
-You can specify different hyper-parameters of the model when running the code. 
+You can specify different values for the model's hyper-parameters such as blocksize, number of epochs, dataset name, etc. 
 
 
 ## References
@@ -45,7 +45,7 @@ This repo is modified based on [PyGCN](https://github.com/tkipf/pygcn).
 
 ## Cite
 
-Please cite our paper if you use this code in your own work:
+Please cite our paper if you use this code in your work:
 
 ```
 @article{heidari2020progressive,
