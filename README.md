@@ -1,10 +1,13 @@
 # PGCN
 
 <div align="left">
-  <a 
-    <img src="https://img.shields.io/pypi/pyversions/continual-inference" height="20" >
+  <a href="https://opensource.org/licenses/Apache-2.0">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" height="20">
   </a>
-  <sup>*</sup>
+  <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9446103">
+    <img src="http://img.shields.io/badge/paper-IEEE.Access-B31B1B.svg" height="20" >
+  </a>
+  <sup>
 </div>
 
 PyTorch implementation of Progressive Graph Convolutional Networks for Semi-Supervised Node Classification method [1].
