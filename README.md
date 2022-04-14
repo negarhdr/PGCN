@@ -1,8 +1,8 @@
 # PGCN
 
 <div align="left">
-  <a href="https://opensource.org/licenses/Apache-2.0">
-    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" height="20">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-blue.svg" height="20">
   </a>
   <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9446103">
     <img src="http://img.shields.io/badge/paper-IEEE.Access-B31B1B.svg" height="20" >
