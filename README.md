@@ -1,6 +1,6 @@
 # PGCN
 PyTorch implementation of Progressive Graph Convolutional Networks for Semi-Supervised Node Classification method [1].
-This work is an extension of GCN method [2], and finds an optimized network architecture for GCNs.
+This work is an extension of GCN method [2], which finds an optimized network GCN architecture for semi-supervised node classification.
 
 
 ![Graph Convolutional Networks](Model-Diagram.png)
