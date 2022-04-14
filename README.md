@@ -1,4 +1,12 @@
 # PGCN
+
+<div align="left">
+  <a 
+    <img src="https://img.shields.io/pypi/pyversions/continual-inference" height="20" >
+  </a>
+  <sup>*</sup>
+</div>
+
 PyTorch implementation of Progressive Graph Convolutional Networks for Semi-Supervised Node Classification method [1].
 This work is an extension of GCN method [2], which finds an optimized network GCN architecture for semi-supervised node classification.
 
